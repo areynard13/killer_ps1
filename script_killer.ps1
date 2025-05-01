@@ -1,6 +1,17 @@
-﻿function checkDataBase {
+﻿Add-Type -AssemblyName System.Windows.Forms
+
+# Déclaration des variables globales
+$isActive = $null
+$message = $null
+$messageIncr = $null
+$lastMessageIncr = ""
+
+function checkDataBase {
     $response = Invoke-RestMethod -Uri "https://68138d49129f6313e211a66e.mockapi.io/management" -Method Get
-    return $response.isActive
+    
+    $global:isActive = $response.isActive
+    $global:message = $response.message.message
+    $global:messageIncr = $response.message.incr
 }
 
 function closeApp {
@@ -25,23 +36,44 @@ function closeAppTest {
     }
 }
 
+function showMessageBox {
+    param (
+        [string]$message,
+        [string]$title = "Message"
+    )
+
+    [System.Windows.Forms.MessageBox]::Show($message, $title, 'OK', 'Information')
+}
+
+# Fonction principale
 function main {
-    $job = $null
+    $jobCloseApp = $null
     $isRunning = $false
 
+    checkDataBase
+    $global:lastMessageIncr = $messageIncr
+
     while ($true) {
-        $isActive = checkDataBase
-        Write-Host "isActive = $isActive" -ForegroundColor Cyan
+        checkDataBase
+
+        Write-Host "isActive = $isActive, messageIncr = $messageIncr" -ForegroundColor Cyan
+
+        if ($messageIncr -ne $lastMessageIncr) {
+            if ($messageIncr -ne "") {
+                showMessageBox -message $message
+            }
+            $global:lastMessageIncr = $messageIncr
+        }
 
         if ($isActive -and -not $isRunning) {
-            $job = Start-Job -ScriptBlock ${function:closeAppTest}
+            $jobCloseApp = Start-Job -ScriptBlock ${function:closeAppTest}
             $isRunning = $true
             Write-Host "killer lancé (simulé)" -ForegroundColor Green
         }
         elseif (-not $isActive -and $isRunning) {
-            Stop-Job $job
-            Wait-Job $job
-            Remove-Job $job
+            Stop-Job $jobCloseApp
+            Wait-Job $jobCloseApp
+            Remove-Job $jobCloseApp
             $isRunning = $false
             Write-Host "killer arrêté (simulé)" -ForegroundColor Yellow
         }
