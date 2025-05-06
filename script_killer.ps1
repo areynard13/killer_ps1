@@ -156,6 +156,7 @@ function main {
                 $body = @{
                     nbPcInfect = @{
                         nbPcInfect = $global:nbPcInfect + 1
+                        nbPcInfectIncr = $global:nbPcInfectIncr
                     }
                 } | ConvertTo-Json
 
