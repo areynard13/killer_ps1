@@ -171,6 +171,16 @@
                     clearInterval(countdown);
                     btnRefresh.disabled = false;
                     btnRefresh.innerHTML = originalText;
+
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            nbPcInfectIncr = data.nbPcInfect.nbPcInfectIncr;
+                            SpaNbPcInfect.innerText = data.nbPcInfect.nbPcInfect;
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors de la récupération des données:', error);
+                        });
                 }
             }, 1000);
 
@@ -186,22 +196,13 @@
                     }
                 })
             })
-            .then(() => {
-                return fetch(url);
-            })
-            .then(response => response.json())
-            .then(data => {
-                nbPcInfectIncr = data.nbPcInfect.nbPcInfectIncr;
-                SpaNbPcInfect.innerText = data.nbPcInfect.nbPcInfect;
-            })
             .catch(error => {
-                console.error('Erreur lors de la mise à jour ou récupération des données:', error);
+                console.error('Erreur lors de la mise à jour des données:', error);
                 clearInterval(countdown);
                 btnRefresh.disabled = false;
                 btnRefresh.innerText = originalText;
-            })
+            });
         });
-
 
         function initialize() {
             fetch(url)
