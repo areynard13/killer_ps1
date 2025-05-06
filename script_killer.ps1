@@ -114,7 +114,11 @@ function showMessageBox {
         [string]$messageContent,
         [string]$title = "System Message"
     )
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = $title
+    $form.Topmost = $true
     [System.Windows.Forms.MessageBox]::Show($messageContent, $title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+    $form.Dispose()
 }
 
 function main {
