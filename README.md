@@ -83,7 +83,6 @@ Le fichier `script_killer.ps1` doit être exécuté sur les machines clientes ci
 * **Risques de Sécurité :** Le mécanisme d'auto-suppression pourrait être perçu comme un moyen d'échapper à la détection et pourrait être utilisé à mauvais escient.
 * **API Factice :** Le code fourni utilise une API factice. Pour implémenter une fonctionnalité de gestion réelle, vous devrez remplacer cela par votre propre API sécurisée et fiable.
 * **Gestion des Erreurs :** Bien que les scripts incluent une certaine gestion des erreurs, des mécanismes de journalisation et de gestion des erreurs plus robustes seraient nécessaires pour une utilisation en production.
-* **Politique d'Exécution :** Comme mentionné précédemment, soyez attentif à la politique d'exécution PowerShell sur les machines clientes.
 
 ## Clause de non-responsabilité
 
