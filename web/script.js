@@ -1,6 +1,6 @@
 const btnIsActive = document.getElementById('btnIsActive');
 const SpaIsActive = document.getElementById('SpaIsActive');
-const form = document.getElementById('messageForm');
+const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
 const messageFeedback = document.getElementById('messageFeedback');
 const btnRefresh = document.getElementById('btnRefresh');
@@ -42,11 +42,11 @@ btnIsActive.addEventListener('click', function () {
     });
 });
 
-form.addEventListener('submit', function (e) {
+messageForm.addEventListener('submit', function (e) {
     e.preventDefault();
 
     const messageText = messageInput.value;
-    const submitButton = form.querySelector('button[type="submit"]');
+    const submitButton = messageForm.querySelector('button[type="submit"]');
     const originalText = submitButton.innerHTML;
 
     submitButton.disabled = true;
