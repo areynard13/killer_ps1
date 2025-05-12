@@ -44,6 +44,7 @@ Le fichier `index.html` est une page web côté client qui interagit avec une AP
                 "nbPcInfect": 1,
                 "nbPcInfectIncr": 5
             },
+            "nbLockSession": 0,
             "id": "1"
         }
         ]
