@@ -45,9 +45,14 @@ Le fichier `index.html` est une page web côté client qui interagit avec une AP
                 "nbPcInfectIncr": 5
             },
             "nbLockSession": 0,
-            "id": "1"
+            "id": "1",
+            "appsToBlocked": [
+                "msedge",
+                "chrome",
+                "code"
+            ]
         }
-        ]
+    ]
     ```
 
 ### Script Client (`script_killer.ps1`)
