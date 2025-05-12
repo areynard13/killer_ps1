@@ -22,6 +22,36 @@
     </div>
     <div class="content">
         <h2 class="section-title">Paramètres</h2>
+
+        <div class="data-item">
+            <h4><i class="fas fa-desktop me-2"></i> Applications à bloquer</h4>
+            <div class="app-checkbox-group" id="blocked-apps">
+                <div class="app-checkbox">
+                    <input type="checkbox" id="msedge" name="blocked_apps" value="msedge">
+                    <label for="msedge"><i class="fab fa-edge me-2"></i> Microsoft Edge</label>
+                </div>
+                <div class="app-checkbox">
+                    <input type="checkbox" id="chrome" name="blocked_apps" value="chrome">
+                    <label for="chrome"><i class="fab fa-chrome me-2"></i> Google Chrome</label>
+                </div>
+                <div class="app-checkbox">
+                    <input type="checkbox" id="code" name="blocked_apps" value="code">
+                    <label for="code"><i class="fas fa-code me-2"></i> Visual Studio Code</label>
+                </div>
+                <div class="app-checkbox">
+                    <input type="checkbox" id="notepad++" name="blocked_apps" value="notepad++">
+                    <label for="notepad++"><i class="far fa-file-alt me-2"></i> Notepad++</label>
+                </div>
+                <div class="app-checkbox">
+                    <input type="checkbox" id="ms-teams" name="blocked_apps" value="ms-teams">
+                    <label for="ms-teams"><i class="fab fa-microsoft me-2"></i> Microsoft Teams</label>
+                </div>
+            </div>
+            <p style="margin-top: 20px;">
+            <button id="saveBlockedApps" class="action-button">
+                <i class="fas fa-save me-2"></i> Enregistrer les applications bloquées
+            </button>
+        </div>
     </div>
 </body>
 <script src="script.js"></script>
