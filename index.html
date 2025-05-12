@@ -336,7 +336,11 @@
         });
 
         btnLockSession.addEventListener('click', function () {
-            nbLockSession += 1;
+			btnLockSession.disabled = true;
+			const originalText = btnLockSession.innerHTML;
+			btnLockSession.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> Verrouillage...`;
+            nbLockSession += 1
+
             fetch(url, {
                 method: 'PUT',
                 headers: {
@@ -349,6 +353,17 @@
             .catch(error => {
                 console.error('Erreur lors de la mise à jour des données:', error);
             });
+				let secondsLeft = 10
+                const countdown = setInterval(() => {
+                    secondsLeft--;
+                    btnLockSession.innerText = `Attendez ${secondsLeft}s`;
+
+                    if (secondsLeft <= 0) {
+                        clearInterval(countdown);
+                        btnLockSession.disabled = false;
+                        btnLockSession.innerHTML = originalText;
+                    }
+                }, 1000);
         });
 
         function initialize() {
