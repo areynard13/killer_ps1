@@ -50,7 +50,8 @@ Le fichier `index.html` est une page web côté client qui interagit avec une AP
                 "msedge",
                 "chrome",
                 "code"
-            ]
+            ],
+            "blockUserInput": false
         }
     ]
     ```
