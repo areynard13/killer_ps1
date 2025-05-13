@@ -1,5 +1,7 @@
 const btnIsActive = document.getElementById('btnIsActive');
+const btnIntera = document.getElementById("btnIntera")
 const SpaIsActive = document.getElementById('SpaIsActive');
+const spaIntera = document.getElementById("spaIntera")
 const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
 const messageFeedback = document.getElementById('messageFeedback');
@@ -9,7 +11,7 @@ const loadingIcon = document.getElementById('loadingIcon');
 const btnLockSession = document.getElementById('btnLockSession')
 const timeToWait = 10000;
 const url = 'https://68138d49129f6313e211a66e.mockapi.io/management/1';
-let isActive;
+let isActive, isInteraActive;
 let messageIncr;
 let nbPcInfectIncr;
 let nbLockSession;
@@ -35,6 +37,32 @@ btnIsActive.addEventListener('click', function () {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ isActive: isActive })
+    }).catch(error => {
+        console.error('Erreur lors de la mise à jour:', error);
+        btnIsActive.disabled = false;
+        btnIsActive.innerHTML = originalText;
+    });
+});
+
+btnIntera.addEventListener("click", function() {
+    isInteraActive = !isInteraActive
+     spaIntera.innerText = isInteraActive ? 'Actif' : 'Inactif';
+     spaIntera.className = isInteraActive ? 'fw-bold status-indicator actif' : 'fw-bold status-indicator inactif';
+     btnIntera.disabled = true;
+    const originalText = btnIntera.innerHTML;
+    btnIntera.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> Chargement...`;
+
+    setTimeout(() => {
+        btnIntera.disabled = false;
+        btnIntera.innerHTML = originalText;
+    }, timeToWait);
+
+    fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ blockUserInput: isInteraActive })
     }).catch(error => {
         console.error('Erreur lors de la mise à jour:', error);
         btnIsActive.disabled = false;
