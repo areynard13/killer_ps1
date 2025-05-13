@@ -25,7 +25,7 @@ btnSaveBlockedApps.addEventListener('click', function() {
         })
     })
 
-    let secondsLeft = 10
+    let secondsLeft = 5
     const countdown = setInterval(() => {
         secondsLeft--;
         btnSaveBlockedApps.innerText = `Attendez ${secondsLeft}s`;

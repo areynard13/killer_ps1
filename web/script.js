@@ -9,7 +9,7 @@ const btnRefresh = document.getElementById('btnRefresh');
 const SpaNbPcInfect = document.getElementById('spaNbPcInfect');
 const loadingIcon = document.getElementById('loadingIcon');
 const btnLockSession = document.getElementById('btnLockSession')
-const timeToWait = 10000;
+const timeToWait = 5000;
 const url = 'https://68138d49129f6313e211a66e.mockapi.io/management/1';
 let isActive, isInteraActive;
 let messageIncr;
@@ -121,7 +121,7 @@ btnRefresh.addEventListener('click', function () {
     btnRefresh.disabled = true;
 
     const originalText = btnRefresh.innerHTML;
-    let secondsLeft = 10;
+    let secondsLeft = 5;
     btnRefresh.innerText = `Attendez ${secondsLeft}s`;
 
     const countdown = setInterval(() => {
@@ -183,7 +183,7 @@ btnLockSession.addEventListener('click', function () {
     .catch(error => {
         console.error('Erreur lors de la mise à jour des données:', error);
     });
-        let secondsLeft = 10
+        let secondsLeft = 5
         const countdown = setInterval(() => {
             secondsLeft--;
             btnLockSession.innerText = `Attendez ${secondsLeft}s`;

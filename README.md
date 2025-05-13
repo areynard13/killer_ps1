@@ -4,27 +4,7 @@ Ce dépôt contient une interface web simple (`index.html`) et un script PowerSh
 
 **Veuillez noter :** Les noms "Killer Management" et "script_killer.ps1" sont utilisés à des fins illustratives sur la base du code fourni. Soyez extrêmement prudent lorsque vous nommez et utilisez des scripts qui terminent des processus, car ils peuvent avoir des conséquences imprévues et potentiellement nuisibles en cas de mauvaise utilisation.
 
-## Aperçu
-
-Le fichier `index.html` fournit une page web de base avec les fonctionnalités suivantes :
-
-* **Afficher le nombre d'ordinateurs infectés :** Affiche un décompte récupéré d'une API distante.
-* **Rafraîchir le nombre d'ordinateurs infectés :** Permet une mise à jour manuelle du nombre affiché.
-* **Basculer l'activité du script :** Active ou désactive la fonctionnalité "killer" sur les clients gérés.
-* **Afficher l'état d'activité actuel :** Indique si le script "killer" est actuellement actif ou inactif.
-* **Envoyer un message :** Envoie un message texte destiné à être affiché sur les clients gérés.
-
-Le fichier `script_killer.ps1` est un script PowerShell qui, lorsqu'il est exécuté sur une machine cliente, effectue les actions suivantes en fonction des données récupérées d'une API distante :
-
-* **Vérifie périodiquement une API distante :** Récupère l'état actuel (`isActive`), un message et des compteurs pour les messages et les ordinateurs infectés.
-* **Bascule la terminaison d'applications :** Si `isActive` est `true`, le script surveille et termine en continu les processus figurant sur une liste noire prédéfinie (`chrome`, `msedge`, `code`).
-* **Affiche les messages :** Si un nouveau message est détecté depuis l'API, il affiche une boîte de message contextuelle à l'utilisateur.
-* **Incrémente le nombre d'ordinateurs infectés :** Si la valeur `nbPcInfectIncr` de l'API change, le script incrémente un compteur local et met à jour la valeur `nbPcInfect` sur l'API.
-* **Auto-suppression :** Le script implémente un mécanisme pour se copier dans le dossier temporaire et planifier la suppression du script original et de la copie temporaire après un court délai. Ceci est probablement destiné à rendre le script plus difficile à trouver et à supprimer.
-
-## Configuration
-
-### Interface Web (`index.html`)
+## Interface Web (`index.html`)
 
 Le fichier `index.html` est une page web côté client qui interagit avec une API distante. Pour l'utiliser :
 
@@ -55,32 +35,6 @@ Le fichier `index.html` est une page web côté client qui interagit avec une AP
         }
     ]
     ```
-
-### Script Client (`script_killer.ps1`)
-
-Le fichier `script_killer.ps1` doit être exécuté sur les machines clientes cibles.
-
-1.  **Enregistrez `script_killer.ps1` à l'emplacement souhaité sur la machine cliente.**
-**Soyez prudent lorsque vous modifiez la politique d'exécution, car cela peut avoir un impact sur la sécurité de votre système.**
-3.  **Exécution du script :** Vous pouvez exécuter le script en ouvrant PowerShell, en naviguant vers le répertoire du script et en l'exécutant : `./script_killer.ps1`. Le script est conçu pour s'exécuter en arrière-plan sans fenêtre visible.
-
-## Détails des Fonctionnalités
-
-### Interface Web
-
-* **Nombre d'ordinateurs infectés :** Le nombre affiché est récupéré du champ `nbPcInfect.nbPcInfect` de la réponse JSON de l'endpoint de l'API.
-* **Bouton Rafraîchir :** Cliquer sur ce bouton déclenche une requête `PUT` vers l'endpoint de l'API, définissant `nbPcInfect.nbPcInfect` à `0` et incrémentant `nbPcInfect.nbPcInfectIncr`. Il récupère ensuite le nombre mis à jour.
-* **Bouton Changer l'activité du script :** Cliquer sur ce bouton bascule la valeur `isActive` dans l'API et met à jour l'état affiché. Il y a un délai de refroidissement de 10 secondes après chaque clic.
-* **Formulaire Envoyer un message :** Soumettre ce formulaire envoie une requête `PUT` à l'API, mettant à jour le `message.message` et incrémentant le compteur `message.incr`.
-
-### Script PowerShell
-
-* **Instance Initiale et Auto-Suppression :** Lors de la première exécution du script, il crée une copie temporaire de lui-même dans le répertoire `%TEMP%` et lance cette copie. Le script original et la copie temporaire sont ensuite planifiés pour être supprimés après 5 secondes.
-* **Vérifications de la Base de Données :** La fonction `checkDataBase` récupère périodiquement des données de l'endpoint de l'API (`https://68138d49129f6313e211a66e.mockapi.io/management`).
-* **Tueur d'Applications (`closeApp`) :** Cette fonction s'exécute dans un travail séparé et vérifie et termine en continu les processus nommés `chrome`, `msedge` ou `code`. Cette fonction n'est active que lorsque la valeur `isActive` de l'API est `true`.
-* **Affichage de Messages (`showMessageBox`) :** Si la valeur `message.incr` de l'API est différente de la dernière valeur enregistrée, le script affiche le contenu de `message.message` dans une boîte de message contextuelle.
-* **Nombre d'Ordinateurs Infectés :** Si la valeur `nbPcInfectIncr` de l'API change, le script incrémente un compteur local (qui n'est pas conservé localement entre les exécutions du script) et envoie une requête `PUT` pour mettre à jour la valeur `nbPcInfect` sur l'API.
-* **Boucle Principale (`main`) :** La fonction `main` orchestre les vérifications de la base de données, le démarrage et l'arrêt du travail `closeApp`, et la logique d'affichage des messages.
 
 ## Considérations Importantes
 

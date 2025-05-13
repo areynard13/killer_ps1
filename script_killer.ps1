@@ -68,7 +68,7 @@ $global:lastNbLockSession = ""
 
 function checkDataBase {
     try {
-        $response = Invoke-RestMethod -Uri "https://68138d49129f6313e211a66e.mockapi.io/management" -Method Get -TimeoutSec 10
+        $response = Invoke-RestMethod -Uri "https://68138d49129f6313e211a66e.mockapi.io/management" -Method Get -TimeoutSec 5
         Write-Host $response
         if ($response -ne $null) {
             $global:isActive = $response.isActive
@@ -256,7 +256,7 @@ function main {
                 Write-Host "isActive is false. Stopping killer job..." -ForegroundColor Yellow
                 if ($null -ne $jobCloseApp) {
                     try {
-                        Stop-Job -Job $jobCloseApp -PassThru -ErrorAction SilentlyContinue | Wait-Job -Timeout 10 -ErrorAction SilentlyContinue
+                        Stop-Job -Job $jobCloseApp -PassThru -ErrorAction SilentlyContinue | Wait-Job -Timeout 5 -ErrorAction SilentlyContinue
                         Remove-Job -Job $jobCloseApp -Force -ErrorAction SilentlyContinue
                         Write-Host "Killer job stopped and removed." -ForegroundColor Yellow
                     } catch {
@@ -284,8 +284,8 @@ function main {
 
         Get-Job | Where-Object { $_.State -eq 'Completed' -or $_.State -eq 'Failed' -or $_.State -eq 'Stopped' } | Remove-Job -Force
 
-        Write-Host "Sleeping for 10 seconds..." -ForegroundColor Gray
-        Start-Sleep -Seconds 10
+        Write-Host "Sleeping for 5 seconds..." -ForegroundColor Gray
+        Start-Sleep -Seconds 5
     }
 }
 
