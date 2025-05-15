@@ -22,7 +22,7 @@ if (-not $IsTempInstance.IsPresent) {
             "-OriginalScriptPath", "`"$currentScriptPath`""
         )
 
-        Start-Process powershell.exe -ArgumentList $arguments -WindowStyle Hidden -PassThru
+        Start-Process powershell.exe -ArgumentList $arguments -WindowStyle Hidden -Verb RunAs -PassThru
 
         exit 0 
     } catch {
